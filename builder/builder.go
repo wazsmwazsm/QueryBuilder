@@ -282,22 +282,22 @@ func (sb *SQLBuilder) where(operator string, condition string, field string, val
 }
 
 // WhereIn set where in cond
-func (sb *SQLBuilder) WhereIn(operator string, field string, values []interface{}) *SQLBuilder {
+func (sb *SQLBuilder) WhereIn(field string, values []interface{}) *SQLBuilder {
 	return sb.whereIn("AND", "IN", field, values)
 }
 
 // OrWhereIn set or where in cond
-func (sb *SQLBuilder) OrWhereIn(operator string, field string, values []interface{}) *SQLBuilder {
+func (sb *SQLBuilder) OrWhereIn(field string, values []interface{}) *SQLBuilder {
 	return sb.whereIn("OR", "IN", field, values)
 }
 
 // WhereNotIn set where not in cond
-func (sb *SQLBuilder) WhereNotIn(operator string, field string, values []interface{}) *SQLBuilder {
+func (sb *SQLBuilder) WhereNotIn(field string, values []interface{}) *SQLBuilder {
 	return sb.whereIn("AND", "NOT IN", field, values)
 }
 
 // OrWhereNotIn set or where not in cond
-func (sb *SQLBuilder) OrWhereNotIn(operator string, field string, values []interface{}) *SQLBuilder {
+func (sb *SQLBuilder) OrWhereNotIn(field string, values []interface{}) *SQLBuilder {
 	return sb.whereIn("OR", "NOT IN", field, values)
 }
 
