@@ -1,6 +1,7 @@
 package builder
 
 import (
+	"errors"
 	"strings"
 )
 
@@ -26,6 +27,9 @@ func NewSQLBuilder() *SQLBuilder {
 
 // GetQuerySQL get sql
 func (sb *SQLBuilder) GetQuerySQL() (string, error) {
+	if sb._table == "" {
+		return "", errors.New("table empty")
+	}
 	var buf strings.Builder
 
 	buf.WriteString("SELECT ")
@@ -62,20 +66,33 @@ func (sb *SQLBuilder) GetQuerySQL() (string, error) {
 
 // GetInsertSQL get sql
 func (sb *SQLBuilder) GetInsertSQL() (string, error) {
+	if sb._table == "" {
+		return "", errors.New("table empty")
+	}
+	if sb._insert == "" {
+		return "", errors.New("insert content empty")
+	}
+
 	var buf strings.Builder
 
 	buf.WriteString("INSERT INTO ")
 	buf.WriteString(sb._table)
-	if sb._where != "" {
-		buf.WriteString(" ")
-		buf.WriteString(sb._insert)
-	}
+	buf.WriteString(" ")
+	buf.WriteString(sb._insert)
 
 	return buf.String(), nil
 }
 
 // GetUpdateSQL get sql
 func (sb *SQLBuilder) GetUpdateSQL() (string, error) {
+	if sb._table == "" {
+		return "", errors.New("table empty")
+	}
+
+	if sb._update == "" {
+		return "", errors.New("update content empty")
+	}
+
 	var buf strings.Builder
 
 	buf.WriteString("UPDATE ")
@@ -92,6 +109,10 @@ func (sb *SQLBuilder) GetUpdateSQL() (string, error) {
 
 // GetDeleteSQL get sql
 func (sb *SQLBuilder) GetDeleteSQL() (string, error) {
+	if sb._table == "" {
+		return "", errors.New("table empty")
+	}
+
 	var buf strings.Builder
 
 	buf.WriteString("DELETE FROM ")
@@ -176,7 +197,7 @@ func (sb *SQLBuilder) Update(cols []string, values []interface{}) *SQLBuilder {
 		buf.WriteString("`")
 		buf.WriteString(col)
 		buf.WriteString("`")
-		buf.WriteString(" = ? ")
+		buf.WriteString(" = ?")
 		if k != len(cols)-1 {
 			buf.WriteString(",")
 		}
