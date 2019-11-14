@@ -4,6 +4,36 @@ import (
 	"testing"
 )
 
+func TestSQLBuilderSelect(t *testing.T) {
+	sb := NewSQLBuilder()
+
+	sql, err := sb.Table("test").
+		Select([]string{"name", "age", "school"}).
+		GetQuerySQL()
+	if err != nil {
+		t.Error(err)
+	}
+
+	expectSQL := "SELECT `name`,`age`,`school` FROM test"
+	if sql != expectSQL {
+		t.Error("sql gen err")
+	}
+}
+
+func TestSQLBuilderSelectAll(t *testing.T) {
+	sb := NewSQLBuilder()
+
+	sql, err := sb.Table("test").GetQuerySQL()
+	if err != nil {
+		t.Error(err)
+	}
+
+	expectSQL := "SELECT * FROM test"
+	if sql != expectSQL {
+		t.Error("sql gen err")
+	}
+}
+
 func TestSQLBuilderWhere(t *testing.T) {
 	sb := NewSQLBuilder()
 
@@ -126,6 +156,47 @@ func TestSQLBuilderHavingNotGen(t *testing.T) {
 	params := sb.GetQueryParams()
 
 	if len(params) != 0 {
+		t.Error("params gen err")
+	}
+}
+
+func TestSQLBuilderOrderBy(t *testing.T) {
+	sb := NewSQLBuilder()
+
+	sql, err := sb.Table("test").
+		Select([]string{"name", "age", "school"}).
+		OrderBy([]string{"age"}, "ASC").
+		GetQuerySQL()
+	if err != nil {
+		t.Error(err)
+	}
+	expectSQL := "SELECT `name`,`age`,`school` FROM test ORDER BY `age` ASC"
+	if sql != expectSQL {
+		t.Error("sql gen err")
+	}
+
+}
+
+func TestSQLBuilderLimit(t *testing.T) {
+	sb := NewSQLBuilder()
+
+	sql, err := sb.Table("test").
+		Select([]string{"name", "age", "school"}).
+		Limit(1, 10).
+		GetQuerySQL()
+	if err != nil {
+		t.Error(err)
+	}
+	expectSQL := "SELECT `name`,`age`,`school` FROM test LIMIT ? OFFSET ?"
+	if sql != expectSQL {
+		t.Error("sql gen err")
+	}
+
+	params := sb.GetQueryParams()
+	if params[0].(int) != 10 {
+		t.Error("params gen err")
+	}
+	if params[1].(int) != 1 {
 		t.Error("params gen err")
 	}
 }
