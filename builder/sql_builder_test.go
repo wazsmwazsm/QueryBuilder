@@ -8,7 +8,7 @@ func TestSQLBuilderSelect(t *testing.T) {
 	sb := NewSQLBuilder()
 
 	sql, err := sb.Table("test").
-		Select([]string{"name", "age", "school"}).
+		Select("name", "age", "school").
 		GetQuerySQL()
 	if err != nil {
 		t.Error(err)
@@ -34,11 +34,26 @@ func TestSQLBuilderSelectAll(t *testing.T) {
 	}
 }
 
+func TestSQLBuilderSelectRaw(t *testing.T) {
+	sb := NewSQLBuilder()
+
+	sql, err := sb.Table("test").
+		SelectRaw("count(`age`), username").
+		GetQuerySQL()
+	if err != nil {
+		t.Error(err)
+	}
+	expectSQL := "SELECT count(`age`), username FROM test"
+	if sql != expectSQL {
+		t.Error("sql gen err")
+	}
+}
+
 func TestSQLBuilderWhere(t *testing.T) {
 	sb := NewSQLBuilder()
 
 	sql, err := sb.Table("test").
-		Select([]string{"name", "age", "school"}).
+		Select("name", "age", "school").
 		Where("name", "=", "jack").
 		Where("age", ">=", 18).
 		OrWhere("name", "like", "%admin%").
@@ -61,13 +76,46 @@ func TestSQLBuilderWhere(t *testing.T) {
 	}
 }
 
+func TestSQLBuilderWhereRaw(t *testing.T) {
+	sb := NewSQLBuilder()
+
+	sql, err := sb.Table("test").
+		Select("name", "age", "school").
+		WhereRaw("`title` = ?", "hello").
+		Where("name", "=", "jack").
+		OrWhereRaw("`age` = ? OR `age` = ?", 22, 25).
+		GetQuerySQL()
+	if err != nil {
+		t.Error(err)
+	}
+	expectSQL := "SELECT `name`,`age`,`school` FROM test WHERE `title` = ? AND `name` = ? OR `age` = ? OR `age` = ?"
+	if sql != expectSQL {
+		t.Error("sql gen err")
+	}
+
+	params := sb.GetQueryParams()
+
+	if params[0].(string) != "hello" {
+		t.Error("params gen err")
+	}
+	if params[1].(string) != "jack" {
+		t.Error("params gen err")
+	}
+	if params[2].(int) != 22 {
+		t.Error("params gen err")
+	}
+	if params[3].(int) != 25 {
+		t.Error("params gen err")
+	}
+}
+
 func TestSQLBuilderWhereIn(t *testing.T) {
 	sb := NewSQLBuilder()
 
 	sql, err := sb.Table("test").
-		Select([]string{"name", "age", "school"}).
-		WhereIn("id", []interface{}{1, 2, 3}).
-		OrWhereNotIn("uid", []interface{}{2, 4}).
+		Select("name", "age", "school").
+		WhereIn("id", 1, 2, 3).
+		OrWhereNotIn("uid", 2, 4).
 		GetQuerySQL()
 	if err != nil {
 		t.Error(err)
@@ -100,8 +148,8 @@ func TestSQLBuilderGroupBy(t *testing.T) {
 	sb := NewSQLBuilder()
 
 	sql, err := sb.Table("test").
-		Select([]string{"name", "age", "school"}).
-		GroupBy([]string{"school", "class"}).
+		Select("name", "age", "school").
+		GroupBy("school", "class").
 		GetQuerySQL()
 	if err != nil {
 		t.Error(err)
@@ -117,8 +165,8 @@ func TestSQLBuilderHaving(t *testing.T) {
 	sb := NewSQLBuilder()
 
 	sql, err := sb.Table("test").
-		Select([]string{"name", "age", "school"}).
-		GroupBy([]string{"school", "class"}).
+		Select("name", "age", "school").
+		GroupBy("school", "class").
 		Having("name", "=", "a").
 		GetQuerySQL()
 	if err != nil {
@@ -141,7 +189,7 @@ func TestSQLBuilderHavingNotGen(t *testing.T) {
 	sb := NewSQLBuilder()
 
 	sql, err := sb.Table("test").
-		Select([]string{"name", "age", "school"}).
+		Select("name", "age", "school").
 		Having("name", "=", "a").
 		GetQuerySQL()
 	if err != nil {
@@ -160,12 +208,40 @@ func TestSQLBuilderHavingNotGen(t *testing.T) {
 	}
 }
 
+func TestSQLBuilderHavingRaw(t *testing.T) {
+	sb := NewSQLBuilder()
+
+	sql, err := sb.Table("test").
+		Select("name", "age", "school").
+		GroupBy("school", "class").
+		Having("name", "=", "a").
+		HavingRaw("count(`school`) <= ?", 22).
+		GetQuerySQL()
+	if err != nil {
+		t.Error(err)
+	}
+
+	expectSQL := "SELECT `name`,`age`,`school` FROM test GROUP BY `school`,`class` HAVING `name` = ? AND count(`school`) <= ?"
+	if sql != expectSQL {
+		t.Error("sql gen err")
+	}
+
+	params := sb.GetQueryParams()
+
+	if params[0].(string) != "a" {
+		t.Error("params gen err")
+	}
+	if params[1].(int) != 22 {
+		t.Error("params gen err")
+	}
+}
+
 func TestSQLBuilderOrderBy(t *testing.T) {
 	sb := NewSQLBuilder()
 
 	sql, err := sb.Table("test").
-		Select([]string{"name", "age", "school"}).
-		OrderBy([]string{"age"}, "ASC").
+		Select("name", "age", "school").
+		OrderBy("ASC", "age").
 		GetQuerySQL()
 	if err != nil {
 		t.Error(err)
@@ -181,7 +257,7 @@ func TestSQLBuilderLimit(t *testing.T) {
 	sb := NewSQLBuilder()
 
 	sql, err := sb.Table("test").
-		Select([]string{"name", "age", "school"}).
+		Select("name", "age", "school").
 		Limit(1, 10).
 		GetQuerySQL()
 	if err != nil {
@@ -205,10 +281,10 @@ func TestSQLBuilderQuery(t *testing.T) {
 	sb := NewSQLBuilder()
 
 	sql, err := sb.Table("test").
-		Select([]string{"name", "age", "school"}).
+		Select("name", "age", "school").
 		Where("name", "=", "jack").
 		Where("age", ">=", 18).
-		OrderBy([]string{"age"}, "DESC").
+		OrderBy("DESC", "age").
 		Limit(1, 10).
 		GetQuerySQL()
 	if err != nil {

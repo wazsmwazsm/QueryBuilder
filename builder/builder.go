@@ -168,7 +168,7 @@ func (sb *SQLBuilder) Table(table string) *SQLBuilder {
 }
 
 // Select set select cols
-func (sb *SQLBuilder) Select(cols []string) *SQLBuilder {
+func (sb *SQLBuilder) Select(cols ...string) *SQLBuilder {
 	var buf strings.Builder
 
 	for k, col := range cols {
@@ -185,8 +185,15 @@ func (sb *SQLBuilder) Select(cols []string) *SQLBuilder {
 	return sb
 }
 
+// SelectRaw set select raw string
+func (sb *SQLBuilder) SelectRaw(s string) *SQLBuilder {
+	sb._select = s
+
+	return sb
+}
+
 // Insert set Insert
-func (sb *SQLBuilder) Insert(cols []string, values []interface{}) *SQLBuilder {
+func (sb *SQLBuilder) Insert(cols []string, values ...interface{}) *SQLBuilder {
 	var buf strings.Builder
 
 	buf.WriteString("(")
@@ -218,7 +225,7 @@ func (sb *SQLBuilder) Insert(cols []string, values []interface{}) *SQLBuilder {
 }
 
 // Update set update
-func (sb *SQLBuilder) Update(cols []string, values []interface{}) *SQLBuilder {
+func (sb *SQLBuilder) Update(cols []string, values ...interface{}) *SQLBuilder {
 	var buf strings.Builder
 
 	buf.WriteString("SET ")
@@ -237,6 +244,39 @@ func (sb *SQLBuilder) Update(cols []string, values []interface{}) *SQLBuilder {
 
 	for _, value := range values {
 		sb._updateParams = append(sb._updateParams, value)
+	}
+
+	return sb
+}
+
+// WhereRaw set where raw string
+func (sb *SQLBuilder) WhereRaw(s string, values ...interface{}) *SQLBuilder {
+	return sb.whereRaw("AND", s, values)
+}
+
+// OrWhereRaw set where raw string
+func (sb *SQLBuilder) OrWhereRaw(s string, values ...interface{}) *SQLBuilder {
+	return sb.whereRaw("OR", s, values)
+}
+
+func (sb *SQLBuilder) whereRaw(operator string, s string, values []interface{}) *SQLBuilder {
+	var buf strings.Builder
+
+	buf.WriteString(sb._where) // append
+
+	if buf.Len() == 0 {
+		buf.WriteString("WHERE ")
+	} else {
+		buf.WriteString(" ")
+		buf.WriteString(operator)
+		buf.WriteString(" ")
+	}
+
+	buf.WriteString(s)
+	sb._where = buf.String()
+
+	for _, value := range values {
+		sb._whereParams = append(sb._whereParams, value)
 	}
 
 	return sb
@@ -282,22 +322,22 @@ func (sb *SQLBuilder) where(operator string, condition string, field string, val
 }
 
 // WhereIn set where in cond
-func (sb *SQLBuilder) WhereIn(field string, values []interface{}) *SQLBuilder {
+func (sb *SQLBuilder) WhereIn(field string, values ...interface{}) *SQLBuilder {
 	return sb.whereIn("AND", "IN", field, values)
 }
 
 // OrWhereIn set or where in cond
-func (sb *SQLBuilder) OrWhereIn(field string, values []interface{}) *SQLBuilder {
+func (sb *SQLBuilder) OrWhereIn(field string, values ...interface{}) *SQLBuilder {
 	return sb.whereIn("OR", "IN", field, values)
 }
 
 // WhereNotIn set where not in cond
-func (sb *SQLBuilder) WhereNotIn(field string, values []interface{}) *SQLBuilder {
+func (sb *SQLBuilder) WhereNotIn(field string, values ...interface{}) *SQLBuilder {
 	return sb.whereIn("AND", "NOT IN", field, values)
 }
 
 // OrWhereNotIn set or where not in cond
-func (sb *SQLBuilder) OrWhereNotIn(field string, values []interface{}) *SQLBuilder {
+func (sb *SQLBuilder) OrWhereNotIn(field string, values ...interface{}) *SQLBuilder {
 	return sb.whereIn("OR", "NOT IN", field, values)
 }
 
@@ -336,7 +376,7 @@ func (sb *SQLBuilder) whereIn(operator string, condition string, field string, v
 }
 
 // GroupBy set group by fields
-func (sb *SQLBuilder) GroupBy(fields []string) *SQLBuilder {
+func (sb *SQLBuilder) GroupBy(fields ...string) *SQLBuilder {
 	var buf strings.Builder
 
 	buf.WriteString("GROUP BY ")
@@ -351,6 +391,39 @@ func (sb *SQLBuilder) GroupBy(fields []string) *SQLBuilder {
 	}
 
 	sb._groupBy = buf.String()
+
+	return sb
+}
+
+// HavingRaw set having raw string
+func (sb *SQLBuilder) HavingRaw(s string, values ...interface{}) *SQLBuilder {
+	return sb.havingRaw("AND", s, values)
+}
+
+// OrHavingRaw set having raw string
+func (sb *SQLBuilder) OrHavingRaw(s string, values ...interface{}) *SQLBuilder {
+	return sb.havingRaw("OR", s, values)
+}
+
+func (sb *SQLBuilder) havingRaw(operator string, s string, values []interface{}) *SQLBuilder {
+	var buf strings.Builder
+
+	buf.WriteString(sb._having) // append
+
+	if buf.Len() == 0 {
+		buf.WriteString("HAVING ")
+	} else {
+		buf.WriteString(" ")
+		buf.WriteString(operator)
+		buf.WriteString(" ")
+	}
+
+	buf.WriteString(s)
+	sb._having = buf.String()
+
+	for _, value := range values {
+		sb._havingParams = append(sb._havingParams, value)
+	}
 
 	return sb
 }
@@ -399,7 +472,7 @@ func (sb *SQLBuilder) having(operator string, condition string, field string, va
 }
 
 // OrderBy set order by fields
-func (sb *SQLBuilder) OrderBy(fields []string, operator string) *SQLBuilder {
+func (sb *SQLBuilder) OrderBy(operator string, fields ...string) *SQLBuilder {
 	var buf strings.Builder
 
 	buf.WriteString("ORDER BY ")
