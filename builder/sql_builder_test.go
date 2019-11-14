@@ -4,6 +4,28 @@ import (
 	"testing"
 )
 
+func TestGetSQLErr(t *testing.T) {
+	sb := NewSQLBuilder()
+
+	_, err := sb.GetQuerySQL()
+	if err != ErrTableEmpty {
+		t.Error("check err")
+	}
+
+	sb = NewSQLBuilder()
+
+	_, err = sb.Table("test").GetInsertSQL()
+	if err != ErrInsertEmpty {
+		t.Error("check err")
+	}
+
+	sb = NewSQLBuilder()
+
+	_, err = sb.Table("test").GetUpdateSQL()
+	if err != ErrUpdateEmpty {
+		t.Error("check err")
+	}
+}
 func TestSQLBuilderSelect(t *testing.T) {
 	sb := NewSQLBuilder()
 
