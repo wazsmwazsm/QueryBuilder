@@ -7,17 +7,21 @@ import (
 
 // SQLBuilder sql builder
 type SQLBuilder struct {
-	_select  string
-	_insert  string
-	_update  string
-	_delete  string
-	_table   string
-	_where   string
-	_groupBy string
-	_having  string
-	_orderBy string
-	_limit   string
-	_params  []interface{}
+	_select       string
+	_insert       string
+	_update       string
+	_delete       string
+	_table        string
+	_where        string
+	_groupBy      string
+	_having       string
+	_orderBy      string
+	_limit        string
+	_insertParams []interface{}
+	_updateParams []interface{}
+	_whereParams  []interface{}
+	_havingParams []interface{}
+	_limitParams  []interface{}
 }
 
 // NewSQLBuilder init sql builder
@@ -125,9 +129,35 @@ func (sb *SQLBuilder) GetDeleteSQL() (string, error) {
 	return buf.String(), nil
 }
 
-// GetParams get params
-func (sb *SQLBuilder) GetParams() []interface{} {
-	return sb._params
+// GetQueryParams get params
+func (sb *SQLBuilder) GetQueryParams() []interface{} {
+	params := []interface{}{}
+	params = append(params, sb._whereParams...)
+	params = append(params, sb._havingParams...)
+	params = append(params, sb._limitParams...)
+	return params
+}
+
+// GetInsertParams get params
+func (sb *SQLBuilder) GetInsertParams() []interface{} {
+	params := []interface{}{}
+	params = append(params, sb._insertParams...)
+	return params
+}
+
+// GetUpdateParams get params
+func (sb *SQLBuilder) GetUpdateParams() []interface{} {
+	params := []interface{}{}
+	params = append(params, sb._updateParams...)
+	params = append(params, sb._whereParams...)
+	return params
+}
+
+// GetDeleteParams get params
+func (sb *SQLBuilder) GetDeleteParams() []interface{} {
+	params := []interface{}{}
+	params = append(params, sb._whereParams...)
+	return params
 }
 
 // Table set table
@@ -181,7 +211,7 @@ func (sb *SQLBuilder) Insert(cols []string, values []interface{}) *SQLBuilder {
 	sb._insert = buf.String()
 
 	for _, value := range values {
-		sb._params = append(sb._params, value)
+		sb._insertParams = append(sb._insertParams, value)
 	}
 
 	return sb
@@ -206,7 +236,7 @@ func (sb *SQLBuilder) Update(cols []string, values []interface{}) *SQLBuilder {
 	sb._update = buf.String()
 
 	for _, value := range values {
-		sb._params = append(sb._params, value)
+		sb._updateParams = append(sb._updateParams, value)
 	}
 
 	return sb
@@ -246,7 +276,7 @@ func (sb *SQLBuilder) where(operator string, condition string, field string, val
 
 	sb._where = buf.String()
 
-	sb._params = append(sb._params, value)
+	sb._whereParams = append(sb._whereParams, value)
 
 	return sb
 }
@@ -299,7 +329,7 @@ func (sb *SQLBuilder) whereIn(operator string, condition string, field string, v
 	sb._where = buf.String()
 
 	for _, value := range values {
-		sb._params = append(sb._params, value)
+		sb._whereParams = append(sb._whereParams, value)
 	}
 
 	return sb
@@ -363,7 +393,7 @@ func (sb *SQLBuilder) having(operator string, condition string, field string, va
 
 	sb._having = buf.String()
 
-	sb._params = append(sb._params, value)
+	sb._havingParams = append(sb._havingParams, value)
 
 	return sb
 }
@@ -399,7 +429,7 @@ func (sb *SQLBuilder) Limit(offset, num interface{}) *SQLBuilder {
 
 	sb._limit = buf.String()
 
-	sb._params = append(sb._params, num, offset)
+	sb._limitParams = append(sb._limitParams, num, offset)
 
 	return sb
 }

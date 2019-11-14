@@ -23,7 +23,7 @@ func TestSQLBuilderQuery(t *testing.T) {
 		t.Error("sql gen err")
 	}
 
-	params := sb.GetParams()
+	params := sb.GetQueryParams()
 
 	if params[0].(string) != "jack" ||
 		params[1].(int) != 18 ||
