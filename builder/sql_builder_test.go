@@ -306,6 +306,76 @@ func TestSQLBuilderQuery(t *testing.T) {
 	}
 }
 
+func TestSQLBuilderInsert(t *testing.T) {
+	sb := NewSQLBuilder()
+
+	sql, err := sb.Table("test").
+		Insert([]string{"name", "age"}, "jack", 18).
+		GetInsertSQL()
+	if err != nil {
+		t.Error(err)
+	}
+
+	expectSQL := "INSERT INTO test (`name`,`age`) VALUES (?,?)"
+	if sql != expectSQL {
+		t.Error("sql gen err")
+	}
+
+	params := sb.GetInsertParams()
+
+	if params[0].(string) != "jack" ||
+		params[1].(int) != 18 {
+		t.Error("params gen err")
+	}
+}
+
+func TestSQLBuilderUpdate(t *testing.T) {
+	sb := NewSQLBuilder()
+
+	sql, err := sb.Table("test").
+		Update([]string{"name", "age"}, "jack", 18).
+		Where("id", "=", 11).
+		GetUpdateSQL()
+	if err != nil {
+		t.Error(err)
+	}
+
+	expectSQL := "UPDATE test SET `name` = ?,`age` = ? WHERE `id` = ?"
+	if sql != expectSQL {
+		t.Error("sql gen err")
+	}
+
+	params := sb.GetUpdateParams()
+
+	if params[0].(string) != "jack" ||
+		params[1].(int) != 18 ||
+		params[2].(int) != 11 {
+		t.Error("params gen err")
+	}
+}
+
+func TestSQLBuilderDelete(t *testing.T) {
+	sb := NewSQLBuilder()
+
+	sql, err := sb.Table("test").
+		Where("id", "=", 11).
+		GetDeleteSQL()
+	if err != nil {
+		t.Error(err)
+	}
+
+	expectSQL := "DELETE FROM test WHERE `id` = ?"
+	if sql != expectSQL {
+		t.Error("sql gen err")
+	}
+
+	params := sb.GetUpdateParams()
+
+	if params[0].(int) != 11 {
+		t.Error("params gen err")
+	}
+}
+
 func TestGeneratePlaceholders(t *testing.T) {
 	pss := []string{
 		generatePlaceholders(5),
