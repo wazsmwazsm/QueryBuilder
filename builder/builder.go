@@ -5,6 +5,15 @@ import (
 	"strings"
 )
 
+var (
+	// ErrTableEmpty table not set
+	ErrTableEmpty = errors.New("table empty")
+	// ErrInsertEmpty insert content not set
+	ErrInsertEmpty = errors.New("insert content empty")
+	// ErrUpdateEmpty update content not set
+	ErrUpdateEmpty = errors.New("update content empty")
+)
+
 // SQLBuilder sql builder
 type SQLBuilder struct {
 	_select       string
@@ -32,7 +41,7 @@ func NewSQLBuilder() *SQLBuilder {
 // GetQuerySQL get sql
 func (sb *SQLBuilder) GetQuerySQL() (string, error) {
 	if sb._table == "" {
-		return "", errors.New("table empty")
+		return "", ErrTableEmpty
 	}
 	var buf strings.Builder
 
@@ -71,10 +80,10 @@ func (sb *SQLBuilder) GetQuerySQL() (string, error) {
 // GetInsertSQL get sql
 func (sb *SQLBuilder) GetInsertSQL() (string, error) {
 	if sb._table == "" {
-		return "", errors.New("table empty")
+		return "", ErrTableEmpty
 	}
 	if sb._insert == "" {
-		return "", errors.New("insert content empty")
+		return "", ErrInsertEmpty
 	}
 
 	var buf strings.Builder
@@ -90,11 +99,11 @@ func (sb *SQLBuilder) GetInsertSQL() (string, error) {
 // GetUpdateSQL get sql
 func (sb *SQLBuilder) GetUpdateSQL() (string, error) {
 	if sb._table == "" {
-		return "", errors.New("table empty")
+		return "", ErrTableEmpty
 	}
 
 	if sb._update == "" {
-		return "", errors.New("update content empty")
+		return "", ErrUpdateEmpty
 	}
 
 	var buf strings.Builder
@@ -114,7 +123,7 @@ func (sb *SQLBuilder) GetUpdateSQL() (string, error) {
 // GetDeleteSQL get sql
 func (sb *SQLBuilder) GetDeleteSQL() (string, error) {
 	if sb._table == "" {
-		return "", errors.New("table empty")
+		return "", ErrTableEmpty
 	}
 
 	var buf strings.Builder
