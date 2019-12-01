@@ -14,6 +14,27 @@ func TestGetSQLErr(t *testing.T) {
 
 	sb = NewSQLBuilder()
 
+	_, err = sb.GetInsertSQL()
+	if err != ErrTableEmpty {
+		t.Error("check err")
+	}
+
+	sb = NewSQLBuilder()
+
+	_, err = sb.GetUpdateSQL()
+	if err != ErrTableEmpty {
+		t.Error("check err")
+	}
+
+	sb = NewSQLBuilder()
+
+	_, err = sb.GetDeleteSQL()
+	if err != ErrTableEmpty {
+		t.Error("check err")
+	}
+
+	sb = NewSQLBuilder()
+
 	_, err = sb.Table("test").GetInsertSQL()
 	if err != ErrInsertEmpty {
 		t.Error("check err")
@@ -166,6 +187,41 @@ func TestSQLBuilderWhereIn(t *testing.T) {
 	}
 }
 
+func TestSQLBuilderOrWhereIn(t *testing.T) {
+	sb := NewSQLBuilder()
+
+	sql, err := sb.Table("test").
+		Select("name", "age", "school").
+		OrWhereIn("id", 1, 2, 3).
+		WhereNotIn("uid", 2, 4).
+		GetQuerySQL()
+	if err != nil {
+		t.Error(err)
+	}
+	expectSQL := "SELECT `name`,`age`,`school` FROM test WHERE `id` IN (?,?,?) AND `uid` NOT IN (?,?)"
+	if sql != expectSQL {
+		t.Error("sql gen err")
+	}
+
+	params := sb.GetQueryParams()
+
+	if params[0].(int) != 1 {
+		t.Error("params gen err")
+	}
+	if params[1].(int) != 2 {
+		t.Error("params gen err")
+	}
+	if params[2].(int) != 3 {
+		t.Error("params gen err")
+	}
+	if params[3].(int) != 2 {
+		t.Error("params gen err")
+	}
+	if params[4].(int) != 4 {
+		t.Error("params gen err")
+	}
+}
+
 func TestSQLBuilderGroupBy(t *testing.T) {
 	sb := NewSQLBuilder()
 
@@ -203,6 +259,35 @@ func TestSQLBuilderHaving(t *testing.T) {
 	params := sb.GetQueryParams()
 
 	if params[0].(string) != "a" {
+		t.Error("params gen err")
+	}
+}
+
+func TestSQLBuilderOrHaving(t *testing.T) {
+	sb := NewSQLBuilder()
+
+	sql, err := sb.Table("test").
+		Select("name", "age", "school").
+		GroupBy("school", "class").
+		Having("name", "=", "a").
+		OrHaving("age", "=", 12).
+		GetQuerySQL()
+	if err != nil {
+		t.Error(err)
+	}
+
+	expectSQL := "SELECT `name`,`age`,`school` FROM test GROUP BY `school`,`class` HAVING `name` = ? OR `age` = ?"
+	if sql != expectSQL {
+		t.Error("sql gen err")
+	}
+
+	params := sb.GetQueryParams()
+
+	if params[0].(string) != "a" {
+		t.Error("params gen err")
+	}
+
+	if params[1].(int) != 12 {
 		t.Error("params gen err")
 	}
 }
@@ -258,6 +343,29 @@ func TestSQLBuilderHavingRaw(t *testing.T) {
 	}
 }
 
+func TestSQLBuilderOrHavingRaw(t *testing.T) {
+	sb := NewSQLBuilder()
+
+	sql, err := sb.Table("test").
+		Select("name", "age", "school").
+		GroupBy("school", "class").
+		OrHavingRaw("count(`school`) <= ?", 22).
+		GetQuerySQL()
+	if err != nil {
+		t.Error(err)
+	}
+
+	expectSQL := "SELECT `name`,`age`,`school` FROM test GROUP BY `school`,`class` HAVING count(`school`) <= ?"
+	if sql != expectSQL {
+		t.Error("sql gen err")
+	}
+
+	params := sb.GetQueryParams()
+
+	if params[0].(int) != 22 {
+		t.Error("params gen err")
+	}
+}
 func TestSQLBuilderOrderBy(t *testing.T) {
 	sb := NewSQLBuilder()
 
@@ -269,6 +377,23 @@ func TestSQLBuilderOrderBy(t *testing.T) {
 		t.Error(err)
 	}
 	expectSQL := "SELECT `name`,`age`,`school` FROM test ORDER BY `age` ASC"
+	if sql != expectSQL {
+		t.Error("sql gen err")
+	}
+
+}
+
+func TestSQLBuilderOrderBy2(t *testing.T) {
+	sb := NewSQLBuilder()
+
+	sql, err := sb.Table("test").
+		Select("name", "age", "school").
+		OrderBy("ASC", "age", "class").
+		GetQuerySQL()
+	if err != nil {
+		t.Error(err)
+	}
+	expectSQL := "SELECT `name`,`age`,`school` FROM test ORDER BY `age`,`class` ASC"
 	if sql != expectSQL {
 		t.Error("sql gen err")
 	}
@@ -391,19 +516,19 @@ func TestSQLBuilderDelete(t *testing.T) {
 		t.Error("sql gen err")
 	}
 
-	params := sb.GetUpdateParams()
+	params := sb.GetDeleteParams()
 
 	if params[0].(int) != 11 {
 		t.Error("params gen err")
 	}
 }
 
-func TestGeneratePlaceholders(t *testing.T) {
+func TestGenPlaceholders(t *testing.T) {
 	pss := []string{
-		generatePlaceholders(5),
-		generatePlaceholders(3),
-		generatePlaceholders(1),
-		generatePlaceholders(0),
+		GenPlaceholders(5),
+		GenPlaceholders(3),
+		GenPlaceholders(1),
+		GenPlaceholders(0),
 	}
 	results := []string{
 		"?,?,?,?,?",
@@ -418,4 +543,142 @@ func TestGeneratePlaceholders(t *testing.T) {
 		}
 	}
 
+}
+
+func BenchmarkQuery(b *testing.B) {
+
+	for i := 0; i < b.N; i++ {
+		sb := NewSQLBuilder()
+		_, err := sb.Table("test").
+			Select("name", "age", "school").
+			Where("name", "=", "jack").
+			Where("age", ">=", 18).
+			OrderBy("DESC", "age").
+			Limit(1, 10).
+			GetQuerySQL()
+		if err != nil {
+			b.Fatal(err)
+		}
+	}
+}
+
+func BenchmarkSelect(b *testing.B) {
+
+	for i := 0; i < b.N; i++ {
+		sb := NewSQLBuilder()
+		_, err := sb.Table("test").
+			Select("name", "age", "school").
+			GetQuerySQL()
+		if err != nil {
+			b.Fatal(err)
+		}
+	}
+}
+
+func BenchmarkWhere(b *testing.B) {
+
+	for i := 0; i < b.N; i++ {
+		sb := NewSQLBuilder()
+		_, err := sb.Table("test").
+			Where("age", ">=", 18).
+			GetQuerySQL()
+		if err != nil {
+			b.Fatal(err)
+		}
+	}
+}
+
+func BenchmarkWhereIn(b *testing.B) {
+
+	for i := 0; i < b.N; i++ {
+		sb := NewSQLBuilder()
+		_, err := sb.Table("test").
+			WhereIn("age", 18, 19, 20, 31, 22, 33, 24, 45).
+			GetQuerySQL()
+		if err != nil {
+			b.Fatal(err)
+		}
+	}
+}
+
+func BenchmarkWhereRaw(b *testing.B) {
+
+	for i := 0; i < b.N; i++ {
+		sb := NewSQLBuilder()
+		_, err := sb.Table("test").
+			WhereRaw("`age` >= ?", 18).
+			GetQuerySQL()
+		if err != nil {
+			b.Fatal(err)
+		}
+	}
+}
+
+func BenchmarkGroupBy(b *testing.B) {
+
+	for i := 0; i < b.N; i++ {
+		sb := NewSQLBuilder()
+		_, err := sb.Table("test").
+			GroupBy("age").
+			GetQuerySQL()
+		if err != nil {
+			b.Fatal(err)
+		}
+	}
+}
+
+func BenchmarkHaving(b *testing.B) {
+
+	for i := 0; i < b.N; i++ {
+		sb := NewSQLBuilder()
+		_, err := sb.Table("test").
+			SelectRaw("`school`, `class`, COUNT(*) as `ct`").
+			GroupBy("school", "class").
+			Having("ct", ">", "2").
+			GetQuerySQL()
+		if err != nil {
+			b.Fatal(err)
+		}
+	}
+}
+
+func BenchmarkHavingRaw(b *testing.B) {
+
+	for i := 0; i < b.N; i++ {
+		sb := NewSQLBuilder()
+		_, err := sb.Table("test").
+			SelectRaw("`school`, `class`, COUNT(*)").
+			GroupBy("school", "class").
+			HavingRaw("COUNT(*) > 2").
+			GetQuerySQL()
+		if err != nil {
+			b.Fatal(err)
+		}
+	}
+}
+
+func BenchmarkInsert(b *testing.B) {
+
+	for i := 0; i < b.N; i++ {
+		sb := NewSQLBuilder()
+		_, err := sb.Table("test").
+			Insert([]string{"name", "class"}, "bob", "2-3").
+			GetInsertSQL()
+		if err != nil {
+			b.Fatal(err)
+		}
+	}
+}
+
+func BenchmarkUpdate(b *testing.B) {
+
+	for i := 0; i < b.N; i++ {
+		sb := NewSQLBuilder()
+		_, err := sb.Table("test").
+			Update([]string{"name", "class"}, "bob", "2-3").
+			GetUpdateSQL()
+		if err != nil {
+			b.Fatal(err)
+		}
+	}
 }

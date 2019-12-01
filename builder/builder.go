@@ -367,7 +367,7 @@ func (sb *SQLBuilder) whereIn(operator string, condition string, field string, v
 	buf.WriteString(field)
 	buf.WriteString("`")
 
-	plhs := generatePlaceholders(len(values))
+	plhs := GenPlaceholders(len(values))
 	buf.WriteString(" ")
 	buf.WriteString(condition)
 	buf.WriteString(" ")
@@ -516,7 +516,8 @@ func (sb *SQLBuilder) Limit(offset, num interface{}) *SQLBuilder {
 	return sb
 }
 
-func generatePlaceholders(n int) string {
+// GenPlaceholders generate placeholders
+func GenPlaceholders(n int) string {
 	var buf strings.Builder
 
 	for i := 0; i < n-1; i++ {
