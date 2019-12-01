@@ -322,3 +322,7 @@ func main() {
 }
 
 ```
+
+# License
+
+The QueryBuilder is open-sourced software licensed under the [MIT license](http://opensource.org/licenses/MIT).
