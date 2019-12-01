@@ -507,7 +507,7 @@ func TestSQLJoin2(t *testing.T) {
 	sql, err := sb.TableRaw("`test` as t1").
 		SelectRaw("`t1`.`name`, `t1`.`age`, `t2`.`teacher`, `t3`.`address`").
 		JoinRaw("LEFT JOIN `test2` as `t2` ON `t1`.`class` = `t2`.`class`").
-		JoinRaw("LEFT JOIN `test3` as t3 ON `t1`.`school` = `t3`.`school`").
+		JoinRaw("INNER JOIN `test3` as t3 ON `t1`.`school` = `t3`.`school`").
 		Where("age", ">=", 18).
 		GetQuerySQL()
 	if err != nil {
@@ -515,7 +515,7 @@ func TestSQLJoin2(t *testing.T) {
 	}
 	expectSQL := "SELECT `t1`.`name`, `t1`.`age`, `t2`.`teacher`, `t3`.`address` FROM `test` as t1" +
 		" LEFT JOIN `test2` as `t2` ON `t1`.`class` = `t2`.`class`" +
-		" LEFT JOIN `test3` as t3 ON `t1`.`school` = `t3`.`school` WHERE `age` >= ?"
+		" INNER JOIN `test3` as t3 ON `t1`.`school` = `t3`.`school` WHERE `age` >= ?"
 	if sql != expectSQL {
 		t.Error("sql gen err")
 	}
