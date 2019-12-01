@@ -426,6 +426,14 @@ func (sb *SQLBuilder) GroupBy(fields ...string) *SQLBuilder {
 	return sb
 }
 
+// GroupByRaw set group by fields with raw sql
+func (sb *SQLBuilder) GroupByRaw(groupBy string) *SQLBuilder {
+
+	sb._groupBy = groupBy
+
+	return sb
+}
+
 // HavingRaw set having raw string
 func (sb *SQLBuilder) HavingRaw(s string, values ...interface{}) *SQLBuilder {
 	return sb.havingRaw("AND", s, values)
@@ -525,6 +533,14 @@ func (sb *SQLBuilder) OrderBy(operator string, fields ...string) *SQLBuilder {
 	return sb
 }
 
+// OrderByRaw set order by fields with raw sql
+func (sb *SQLBuilder) OrderByRaw(orderBy string) *SQLBuilder {
+
+	sb._orderBy = orderBy
+
+	return sb
+}
+
 // Limit set limit
 func (sb *SQLBuilder) Limit(offset, num interface{}) *SQLBuilder {
 	var buf strings.Builder
@@ -534,6 +550,17 @@ func (sb *SQLBuilder) Limit(offset, num interface{}) *SQLBuilder {
 	sb._limit = buf.String()
 
 	sb._limitParams = append(sb._limitParams, num, offset)
+
+	return sb
+}
+
+// LimitRaw set limit with raw sql
+func (sb *SQLBuilder) LimitRaw(limit string, values ...interface{}) *SQLBuilder {
+	sb._limit = limit
+
+	for _, value := range values {
+		sb._limitParams = append(sb._limitParams, value)
+	}
 
 	return sb
 }
