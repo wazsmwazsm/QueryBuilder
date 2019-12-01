@@ -11,7 +11,7 @@ func main() {
 	sql, err := sb.Table("test").
 		SelectRaw("`test`.`name`, `test`.`age`, `test2`.`teacher`").
 		JoinRaw("LEFT JOIN `test2` ON `test`.`class` = `test2`.`class`").
-		Where("age", ">=", 18).
+		WhereRaw("`test`.`age` >= ?", 18).
 		GetQuerySQL()
 	if err != nil {
 		log.Fatal(err)
@@ -19,6 +19,6 @@ func main() {
 
 	params := sb.GetQueryParams()
 
-	log.Println(sql)    // SELECT `test`.`name`, `test`.`age`, `test2`.`teacher` FROM `test` LEFT JOIN `test2` ON `test`.`class` = `test2`.`class` WHERE `age` >= ?
+	log.Println(sql)    // SELECT `test`.`name`, `test`.`age`, `test2`.`teacher` FROM `test` LEFT JOIN `test2` ON `test`.`class` = `test2`.`class` WHERE `test`.`age` >= ?
 	log.Println(params) // [18]
 }
