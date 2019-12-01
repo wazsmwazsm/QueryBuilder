@@ -57,7 +57,7 @@ func TestSQLBuilderSelect(t *testing.T) {
 		t.Error(err)
 	}
 
-	expectSQL := "SELECT `name`,`age`,`school` FROM test"
+	expectSQL := "SELECT `name`,`age`,`school` FROM `test`"
 	if sql != expectSQL {
 		t.Error("sql gen err")
 	}
@@ -71,7 +71,7 @@ func TestSQLBuilderSelectAll(t *testing.T) {
 		t.Error(err)
 	}
 
-	expectSQL := "SELECT * FROM test"
+	expectSQL := "SELECT * FROM `test`"
 	if sql != expectSQL {
 		t.Error("sql gen err")
 	}
@@ -86,7 +86,7 @@ func TestSQLBuilderSelectRaw(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	expectSQL := "SELECT count(`age`), username FROM test"
+	expectSQL := "SELECT count(`age`), username FROM `test`"
 	if sql != expectSQL {
 		t.Error("sql gen err")
 	}
@@ -105,7 +105,7 @@ func TestSQLBuilderWhere(t *testing.T) {
 		t.Error(err)
 	}
 
-	expectSQL := "SELECT `name`,`age`,`school` FROM test WHERE `name` = ? AND `age` >= ? OR `name` like ?"
+	expectSQL := "SELECT `name`,`age`,`school` FROM `test` WHERE `name` = ? AND `age` >= ? OR `name` like ?"
 	if sql != expectSQL {
 		t.Error("sql gen err")
 	}
@@ -131,7 +131,7 @@ func TestSQLBuilderWhereRaw(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	expectSQL := "SELECT `name`,`age`,`school` FROM test WHERE `title` = ? AND `name` = ? OR `age` = ? OR `age` = ?"
+	expectSQL := "SELECT `name`,`age`,`school` FROM `test` WHERE `title` = ? AND `name` = ? OR `age` = ? OR `age` = ?"
 	if sql != expectSQL {
 		t.Error("sql gen err")
 	}
@@ -163,7 +163,7 @@ func TestSQLBuilderWhereIn(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	expectSQL := "SELECT `name`,`age`,`school` FROM test WHERE `id` IN (?,?,?) OR `uid` NOT IN (?,?)"
+	expectSQL := "SELECT `name`,`age`,`school` FROM `test` WHERE `id` IN (?,?,?) OR `uid` NOT IN (?,?)"
 	if sql != expectSQL {
 		t.Error("sql gen err")
 	}
@@ -198,7 +198,7 @@ func TestSQLBuilderOrWhereIn(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	expectSQL := "SELECT `name`,`age`,`school` FROM test WHERE `id` IN (?,?,?) AND `uid` NOT IN (?,?)"
+	expectSQL := "SELECT `name`,`age`,`school` FROM `test` WHERE `id` IN (?,?,?) AND `uid` NOT IN (?,?)"
 	if sql != expectSQL {
 		t.Error("sql gen err")
 	}
@@ -233,7 +233,7 @@ func TestSQLBuilderGroupBy(t *testing.T) {
 		t.Error(err)
 	}
 
-	expectSQL := "SELECT `name`,`age`,`school` FROM test GROUP BY `school`,`class`"
+	expectSQL := "SELECT `name`,`age`,`school` FROM `test` GROUP BY `school`,`class`"
 	if sql != expectSQL {
 		t.Error("sql gen err")
 	}
@@ -251,7 +251,7 @@ func TestSQLBuilderHaving(t *testing.T) {
 		t.Error(err)
 	}
 
-	expectSQL := "SELECT `name`,`age`,`school` FROM test GROUP BY `school`,`class` HAVING `name` = ?"
+	expectSQL := "SELECT `name`,`age`,`school` FROM `test` GROUP BY `school`,`class` HAVING `name` = ?"
 	if sql != expectSQL {
 		t.Error("sql gen err")
 	}
@@ -276,7 +276,7 @@ func TestSQLBuilderOrHaving(t *testing.T) {
 		t.Error(err)
 	}
 
-	expectSQL := "SELECT `name`,`age`,`school` FROM test GROUP BY `school`,`class` HAVING `name` = ? OR `age` = ?"
+	expectSQL := "SELECT `name`,`age`,`school` FROM `test` GROUP BY `school`,`class` HAVING `name` = ? OR `age` = ?"
 	if sql != expectSQL {
 		t.Error("sql gen err")
 	}
@@ -303,7 +303,7 @@ func TestSQLBuilderHavingNotGen(t *testing.T) {
 		t.Error(err)
 	}
 
-	expectSQL := "SELECT `name`,`age`,`school` FROM test"
+	expectSQL := "SELECT `name`,`age`,`school` FROM `test`"
 	if sql != expectSQL {
 		t.Error("sql gen err")
 	}
@@ -328,7 +328,7 @@ func TestSQLBuilderHavingRaw(t *testing.T) {
 		t.Error(err)
 	}
 
-	expectSQL := "SELECT `name`,`age`,`school` FROM test GROUP BY `school`,`class` HAVING `name` = ? AND count(`school`) <= ?"
+	expectSQL := "SELECT `name`,`age`,`school` FROM `test` GROUP BY `school`,`class` HAVING `name` = ? AND count(`school`) <= ?"
 	if sql != expectSQL {
 		t.Error("sql gen err")
 	}
@@ -355,7 +355,7 @@ func TestSQLBuilderOrHavingRaw(t *testing.T) {
 		t.Error(err)
 	}
 
-	expectSQL := "SELECT `name`,`age`,`school` FROM test GROUP BY `school`,`class` HAVING count(`school`) <= ?"
+	expectSQL := "SELECT `name`,`age`,`school` FROM `test` GROUP BY `school`,`class` HAVING count(`school`) <= ?"
 	if sql != expectSQL {
 		t.Error("sql gen err")
 	}
@@ -376,7 +376,7 @@ func TestSQLBuilderOrderBy(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	expectSQL := "SELECT `name`,`age`,`school` FROM test ORDER BY `age` ASC"
+	expectSQL := "SELECT `name`,`age`,`school` FROM `test` ORDER BY `age` ASC"
 	if sql != expectSQL {
 		t.Error("sql gen err")
 	}
@@ -393,7 +393,7 @@ func TestSQLBuilderOrderBy2(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	expectSQL := "SELECT `name`,`age`,`school` FROM test ORDER BY `age`,`class` ASC"
+	expectSQL := "SELECT `name`,`age`,`school` FROM `test` ORDER BY `age`,`class` ASC"
 	if sql != expectSQL {
 		t.Error("sql gen err")
 	}
@@ -410,7 +410,7 @@ func TestSQLBuilderLimit(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	expectSQL := "SELECT `name`,`age`,`school` FROM test LIMIT ? OFFSET ?"
+	expectSQL := "SELECT `name`,`age`,`school` FROM `test` LIMIT ? OFFSET ?"
 	if sql != expectSQL {
 		t.Error("sql gen err")
 	}
@@ -438,7 +438,7 @@ func TestSQLBuilderQuery(t *testing.T) {
 		t.Error(err)
 	}
 
-	expectSQL := "SELECT `name`,`age`,`school` FROM test WHERE `name` = ? AND `age` >= ? ORDER BY `age` DESC LIMIT ? OFFSET ?"
+	expectSQL := "SELECT `name`,`age`,`school` FROM `test` WHERE `name` = ? AND `age` >= ? ORDER BY `age` DESC LIMIT ? OFFSET ?"
 	if sql != expectSQL {
 		t.Error("sql gen err")
 	}
@@ -453,6 +453,80 @@ func TestSQLBuilderQuery(t *testing.T) {
 	}
 }
 
+func TestSQLJoin(t *testing.T) {
+	sb := NewSQLBuilder()
+
+	sql, err := sb.Table("test").
+		SelectRaw("`test`.`name`, `test`.`age`, `test2`.`teacher`").
+		JoinRaw("LEFT JOIN `test2` ON `test`.`class` = `test2`.`class`").
+		Where("age", ">=", 18).
+		GetQuerySQL()
+	if err != nil {
+		t.Error(err)
+	}
+	expectSQL := "SELECT `test`.`name`, `test`.`age`, `test2`.`teacher` FROM `test`" +
+		" LEFT JOIN `test2` ON `test`.`class` = `test2`.`class` WHERE `age` >= ?"
+	if sql != expectSQL {
+		t.Error("sql gen err")
+	}
+
+	params := sb.GetQueryParams()
+
+	if params[0].(int) != 18 {
+		t.Error("params gen err")
+	}
+}
+
+func TestSQLJoinWithParams(t *testing.T) {
+	sb := NewSQLBuilder()
+
+	sql, err := sb.Table("test").
+		SelectRaw("`test`.`name`, `test`.`age`, `test2`.`teacher`").
+		JoinRaw("LEFT JOIN `test2` ON `test`.`class` = `test2`.`class` AND `test`.`num` = ?", 2333).
+		Where("age", ">=", 18).
+		GetQuerySQL()
+	if err != nil {
+		t.Error(err)
+	}
+	expectSQL := "SELECT `test`.`name`, `test`.`age`, `test2`.`teacher` FROM `test`" +
+		" LEFT JOIN `test2` ON `test`.`class` = `test2`.`class` AND `test`.`num` = ? WHERE `age` >= ?"
+	if sql != expectSQL {
+		t.Error("sql gen err")
+	}
+
+	params := sb.GetQueryParams()
+
+	if params[0].(int) != 2333 || params[1].(int) != 18 {
+		t.Error("params gen err")
+	}
+}
+
+func TestSQLJoin2(t *testing.T) {
+	sb := NewSQLBuilder()
+
+	sql, err := sb.TableRaw("`test` as t1").
+		SelectRaw("`t1`.`name`, `t1`.`age`, `t2`.`teacher`, `t3`.`address`").
+		JoinRaw("LEFT JOIN `test2` as `t2` ON `t1`.`class` = `t2`.`class`").
+		JoinRaw("LEFT JOIN `test3` as t3 ON `t1`.`school` = `t3`.`school`").
+		Where("age", ">=", 18).
+		GetQuerySQL()
+	if err != nil {
+		t.Error(err)
+	}
+	expectSQL := "SELECT `t1`.`name`, `t1`.`age`, `t2`.`teacher`, `t3`.`address` FROM `test` as t1" +
+		" LEFT JOIN `test2` as `t2` ON `t1`.`class` = `t2`.`class`" +
+		" LEFT JOIN `test3` as t3 ON `t1`.`school` = `t3`.`school` WHERE `age` >= ?"
+	if sql != expectSQL {
+		t.Error("sql gen err")
+	}
+
+	params := sb.GetQueryParams()
+
+	if params[0].(int) != 18 {
+		t.Error("params gen err")
+	}
+}
+
 func TestSQLBuilderInsert(t *testing.T) {
 	sb := NewSQLBuilder()
 
@@ -463,7 +537,7 @@ func TestSQLBuilderInsert(t *testing.T) {
 		t.Error(err)
 	}
 
-	expectSQL := "INSERT INTO test (`name`,`age`) VALUES (?,?)"
+	expectSQL := "INSERT INTO `test` (`name`,`age`) VALUES (?,?)"
 	if sql != expectSQL {
 		t.Error("sql gen err")
 	}
@@ -487,7 +561,7 @@ func TestSQLBuilderUpdate(t *testing.T) {
 		t.Error(err)
 	}
 
-	expectSQL := "UPDATE test SET `name` = ?,`age` = ? WHERE `id` = ?"
+	expectSQL := "UPDATE `test` SET `name` = ?,`age` = ? WHERE `id` = ?"
 	if sql != expectSQL {
 		t.Error("sql gen err")
 	}
@@ -511,7 +585,7 @@ func TestSQLBuilderDelete(t *testing.T) {
 		t.Error(err)
 	}
 
-	expectSQL := "DELETE FROM test WHERE `id` = ?"
+	expectSQL := "DELETE FROM `test` WHERE `id` = ?"
 	if sql != expectSQL {
 		t.Error("sql gen err")
 	}

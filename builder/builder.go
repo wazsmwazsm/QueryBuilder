@@ -21,6 +21,7 @@ type SQLBuilder struct {
 	_update       string
 	_delete       string
 	_table        string
+	_join         string
 	_where        string
 	_groupBy      string
 	_having       string
@@ -31,11 +32,13 @@ type SQLBuilder struct {
 	_whereParams  []interface{}
 	_havingParams []interface{}
 	_limitParams  []interface{}
+	_joinParams   []interface{}
+	EscapeSymbol  string
 }
 
 // NewSQLBuilder init sql builder
 func NewSQLBuilder() *SQLBuilder {
-	return &SQLBuilder{}
+	return &SQLBuilder{EscapeSymbol: "`"}
 }
 
 // GetQuerySQL get sql
@@ -53,6 +56,10 @@ func (sb *SQLBuilder) GetQuerySQL() (string, error) {
 	}
 	buf.WriteString(" FROM ")
 	buf.WriteString(sb._table)
+	if sb._join != "" {
+		buf.WriteString(" ")
+		buf.WriteString(sb._join)
+	}
 	if sb._where != "" {
 		buf.WriteString(" ")
 		buf.WriteString(sb._where)
@@ -141,6 +148,7 @@ func (sb *SQLBuilder) GetDeleteSQL() (string, error) {
 // GetQueryParams get params
 func (sb *SQLBuilder) GetQueryParams() []interface{} {
 	params := []interface{}{}
+	params = append(params, sb._joinParams...)
 	params = append(params, sb._whereParams...)
 	params = append(params, sb._havingParams...)
 	params = append(params, sb._limitParams...)
@@ -171,6 +179,20 @@ func (sb *SQLBuilder) GetDeleteParams() []interface{} {
 
 // Table set table
 func (sb *SQLBuilder) Table(table string) *SQLBuilder {
+	var buf strings.Builder
+
+	buf.WriteString(sb.EscapeSymbol)
+	buf.WriteString(table)
+	buf.WriteString(sb.EscapeSymbol)
+
+	sb._table = buf.String()
+
+	return sb
+}
+
+// TableRaw set table with raw sql
+func (sb *SQLBuilder) TableRaw(table string) *SQLBuilder {
+
 	sb._table = table
 
 	return sb
@@ -181,9 +203,9 @@ func (sb *SQLBuilder) Select(cols ...string) *SQLBuilder {
 	var buf strings.Builder
 
 	for k, col := range cols {
-		buf.WriteString("`")
+		buf.WriteString(sb.EscapeSymbol)
 		buf.WriteString(col)
-		buf.WriteString("`")
+		buf.WriteString(sb.EscapeSymbol)
 		if k != len(cols)-1 {
 			buf.WriteString(",")
 		}
@@ -207,9 +229,9 @@ func (sb *SQLBuilder) Insert(cols []string, values ...interface{}) *SQLBuilder {
 
 	buf.WriteString("(")
 	for k, col := range cols {
-		buf.WriteString("`")
+		buf.WriteString(sb.EscapeSymbol)
 		buf.WriteString(col)
-		buf.WriteString("`")
+		buf.WriteString(sb.EscapeSymbol)
 		if k != len(cols)-1 {
 			buf.WriteString(",")
 		}
@@ -240,9 +262,9 @@ func (sb *SQLBuilder) Update(cols []string, values ...interface{}) *SQLBuilder {
 	buf.WriteString("SET ")
 
 	for k, col := range cols {
-		buf.WriteString("`")
+		buf.WriteString(sb.EscapeSymbol)
 		buf.WriteString(col)
-		buf.WriteString("`")
+		buf.WriteString(sb.EscapeSymbol)
 		buf.WriteString(" = ?")
 		if k != len(cols)-1 {
 			buf.WriteString(",")
@@ -314,9 +336,9 @@ func (sb *SQLBuilder) where(operator string, condition string, field string, val
 		buf.WriteString(" ")
 	}
 
-	buf.WriteString("`")
+	buf.WriteString(sb.EscapeSymbol)
 	buf.WriteString(field)
-	buf.WriteString("`")
+	buf.WriteString(sb.EscapeSymbol)
 
 	buf.WriteString(" ")
 	buf.WriteString(condition)
@@ -363,9 +385,9 @@ func (sb *SQLBuilder) whereIn(operator string, condition string, field string, v
 		buf.WriteString(" ")
 	}
 
-	buf.WriteString("`")
+	buf.WriteString(sb.EscapeSymbol)
 	buf.WriteString(field)
-	buf.WriteString("`")
+	buf.WriteString(sb.EscapeSymbol)
 
 	plhs := GenPlaceholders(len(values))
 	buf.WriteString(" ")
@@ -391,9 +413,9 @@ func (sb *SQLBuilder) GroupBy(fields ...string) *SQLBuilder {
 	buf.WriteString("GROUP BY ")
 
 	for k, field := range fields {
-		buf.WriteString("`")
+		buf.WriteString(sb.EscapeSymbol)
 		buf.WriteString(field)
-		buf.WriteString("`")
+		buf.WriteString(sb.EscapeSymbol)
 		if k != len(fields)-1 {
 			buf.WriteString(",")
 		}
@@ -464,9 +486,9 @@ func (sb *SQLBuilder) having(operator string, condition string, field string, va
 		buf.WriteString(" ")
 	}
 
-	buf.WriteString("`")
+	buf.WriteString(sb.EscapeSymbol)
 	buf.WriteString(field)
-	buf.WriteString("`")
+	buf.WriteString(sb.EscapeSymbol)
 
 	buf.WriteString(" ")
 	buf.WriteString(condition)
@@ -487,9 +509,9 @@ func (sb *SQLBuilder) OrderBy(operator string, fields ...string) *SQLBuilder {
 	buf.WriteString("ORDER BY ")
 
 	for k, field := range fields {
-		buf.WriteString("`")
+		buf.WriteString(sb.EscapeSymbol)
 		buf.WriteString(field)
-		buf.WriteString("`")
+		buf.WriteString(sb.EscapeSymbol)
 		if k != len(fields)-1 {
 			buf.WriteString(",")
 		}
@@ -512,6 +534,25 @@ func (sb *SQLBuilder) Limit(offset, num interface{}) *SQLBuilder {
 	sb._limit = buf.String()
 
 	sb._limitParams = append(sb._limitParams, num, offset)
+
+	return sb
+}
+
+// JoinRaw join with raw sql
+func (sb *SQLBuilder) JoinRaw(join string, values ...interface{}) *SQLBuilder {
+	var buf strings.Builder
+
+	buf.WriteString(sb._join)
+	if buf.Len() != 0 {
+		buf.WriteString(" ")
+	}
+	buf.WriteString(join)
+
+	sb._join = buf.String()
+
+	for _, value := range values {
+		sb._joinParams = append(sb._joinParams, value)
+	}
 
 	return sb
 }
