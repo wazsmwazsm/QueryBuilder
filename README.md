@@ -58,6 +58,7 @@ func main() {
 
 ```
 
+> tips: in postgresql or sqlite, you should change escape quota ` to "
 
 ### where in 
 
