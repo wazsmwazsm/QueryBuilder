@@ -9,7 +9,7 @@ func main() {
 	sb := builder.NewSQLBuilder()
 
 	sql, err := sb.Table("test").
-		SelectRaw("count(`age`), username").
+		Select("count(`age`)", "username").
 		GetQuerySQL()
 	if err != nil {
 		log.Fatal(err)

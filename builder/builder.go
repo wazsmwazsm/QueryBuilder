@@ -33,12 +33,11 @@ type SQLBuilder struct {
 	_havingParams []interface{}
 	_limitParams  []interface{}
 	_joinParams   []interface{}
-	EscapeSymbol  string
 }
 
 // NewSQLBuilder init sql builder
 func NewSQLBuilder() *SQLBuilder {
-	return &SQLBuilder{EscapeSymbol: "`"}
+	return &SQLBuilder{}
 }
 
 // GetQuerySQL get sql
@@ -179,19 +178,6 @@ func (sb *SQLBuilder) GetDeleteParams() []interface{} {
 
 // Table set table
 func (sb *SQLBuilder) Table(table string) *SQLBuilder {
-	var buf strings.Builder
-
-	buf.WriteString(sb.EscapeSymbol)
-	buf.WriteString(table)
-	buf.WriteString(sb.EscapeSymbol)
-
-	sb._table = buf.String()
-
-	return sb
-}
-
-// TableRaw set table with raw sql
-func (sb *SQLBuilder) TableRaw(table string) *SQLBuilder {
 
 	sb._table = table
 
@@ -203,9 +189,9 @@ func (sb *SQLBuilder) Select(cols ...string) *SQLBuilder {
 	var buf strings.Builder
 
 	for k, col := range cols {
-		buf.WriteString(sb.EscapeSymbol)
+
 		buf.WriteString(col)
-		buf.WriteString(sb.EscapeSymbol)
+
 		if k != len(cols)-1 {
 			buf.WriteString(",")
 		}
@@ -216,22 +202,15 @@ func (sb *SQLBuilder) Select(cols ...string) *SQLBuilder {
 	return sb
 }
 
-// SelectRaw set select raw string
-func (sb *SQLBuilder) SelectRaw(s string) *SQLBuilder {
-	sb._select = s
-
-	return sb
-}
-
 // Insert set Insert
 func (sb *SQLBuilder) Insert(cols []string, values ...interface{}) *SQLBuilder {
 	var buf strings.Builder
 
 	buf.WriteString("(")
 	for k, col := range cols {
-		buf.WriteString(sb.EscapeSymbol)
+
 		buf.WriteString(col)
-		buf.WriteString(sb.EscapeSymbol)
+
 		if k != len(cols)-1 {
 			buf.WriteString(",")
 		}
@@ -262,9 +241,9 @@ func (sb *SQLBuilder) Update(cols []string, values ...interface{}) *SQLBuilder {
 	buf.WriteString("SET ")
 
 	for k, col := range cols {
-		buf.WriteString(sb.EscapeSymbol)
+
 		buf.WriteString(col)
-		buf.WriteString(sb.EscapeSymbol)
+
 		buf.WriteString(" = ?")
 		if k != len(cols)-1 {
 			buf.WriteString(",")
@@ -336,9 +315,7 @@ func (sb *SQLBuilder) where(operator string, condition string, field string, val
 		buf.WriteString(" ")
 	}
 
-	buf.WriteString(sb.EscapeSymbol)
 	buf.WriteString(field)
-	buf.WriteString(sb.EscapeSymbol)
 
 	buf.WriteString(" ")
 	buf.WriteString(condition)
@@ -385,9 +362,7 @@ func (sb *SQLBuilder) whereIn(operator string, condition string, field string, v
 		buf.WriteString(" ")
 	}
 
-	buf.WriteString(sb.EscapeSymbol)
 	buf.WriteString(field)
-	buf.WriteString(sb.EscapeSymbol)
 
 	plhs := GenPlaceholders(len(values))
 	buf.WriteString(" ")
@@ -413,23 +388,15 @@ func (sb *SQLBuilder) GroupBy(fields ...string) *SQLBuilder {
 	buf.WriteString("GROUP BY ")
 
 	for k, field := range fields {
-		buf.WriteString(sb.EscapeSymbol)
+
 		buf.WriteString(field)
-		buf.WriteString(sb.EscapeSymbol)
+
 		if k != len(fields)-1 {
 			buf.WriteString(",")
 		}
 	}
 
 	sb._groupBy = buf.String()
-
-	return sb
-}
-
-// GroupByRaw set group by fields with raw sql
-func (sb *SQLBuilder) GroupByRaw(groupBy string) *SQLBuilder {
-
-	sb._groupBy = groupBy
 
 	return sb
 }
@@ -494,9 +461,7 @@ func (sb *SQLBuilder) having(operator string, condition string, field string, va
 		buf.WriteString(" ")
 	}
 
-	buf.WriteString(sb.EscapeSymbol)
 	buf.WriteString(field)
-	buf.WriteString(sb.EscapeSymbol)
 
 	buf.WriteString(" ")
 	buf.WriteString(condition)
@@ -517,9 +482,9 @@ func (sb *SQLBuilder) OrderBy(operator string, fields ...string) *SQLBuilder {
 	buf.WriteString("ORDER BY ")
 
 	for k, field := range fields {
-		buf.WriteString(sb.EscapeSymbol)
+
 		buf.WriteString(field)
-		buf.WriteString(sb.EscapeSymbol)
+
 		if k != len(fields)-1 {
 			buf.WriteString(",")
 		}
@@ -533,14 +498,6 @@ func (sb *SQLBuilder) OrderBy(operator string, fields ...string) *SQLBuilder {
 	return sb
 }
 
-// OrderByRaw set order by fields with raw sql
-func (sb *SQLBuilder) OrderByRaw(orderBy string) *SQLBuilder {
-
-	sb._orderBy = orderBy
-
-	return sb
-}
-
 // Limit set limit
 func (sb *SQLBuilder) Limit(offset, num interface{}) *SQLBuilder {
 	var buf strings.Builder
@@ -550,17 +507,6 @@ func (sb *SQLBuilder) Limit(offset, num interface{}) *SQLBuilder {
 	sb._limit = buf.String()
 
 	sb._limitParams = append(sb._limitParams, num, offset)
-
-	return sb
-}
-
-// LimitRaw set limit with raw sql
-func (sb *SQLBuilder) LimitRaw(limit string, values ...interface{}) *SQLBuilder {
-	sb._limit = limit
-
-	for _, value := range values {
-		sb._limitParams = append(sb._limitParams, value)
-	}
 
 	return sb
 }
