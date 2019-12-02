@@ -1,4 +1,8 @@
 # QueryBuilder
+
+[![Build Status](https://travis-ci.org/wazsmwazsm/QueryBuilder.svg?branch=master)](https://travis-ci.org/wazsmwazsm/QueryBuilder)
+
+
 A sql query builder for golang
 
 # mission
