@@ -8,8 +8,8 @@ import (
 func main() {
 	sb := builder.NewSQLBuilder()
 
-	sql, err := sb.Table("test").
-		Where("id", "=", 11).
+	sql, err := sb.Table("`test`").
+		Where("`id`", "=", 11).
 		GetDeleteSQL()
 	if err != nil {
 		log.Fatal(err)
@@ -17,6 +17,6 @@ func main() {
 
 	params := sb.GetDeleteParams()
 
-	log.Println(sql)    // DELETE FROM test WHERE `id` = ?
+	log.Println(sql)    // DELETE FROM `test` WHERE `id` = ?
 	log.Println(params) // [11]
 }

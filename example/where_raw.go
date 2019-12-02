@@ -8,11 +8,11 @@ import (
 func main() {
 	sb := builder.NewSQLBuilder()
 
-	sql, err := sb.Table("test").
-		Select("name", "age", "school").
+	sql, err := sb.Table("`test`").
+		Select("`name`", "`age`", "`school`").
 		WhereRaw("`title` = ?", "hello").
-		Where("name", "=", "jack").
-		OrWhereRaw("`age` = ? OR `age` = ?", 22, 25).
+		Where("`name`", "=", "jack").
+		OrWhereRaw("(`age` = ? OR `age` = ?) AND `class` = ?", 22, 25, "2-3").
 		GetQuerySQL()
 	if err != nil {
 		log.Fatal(err)
@@ -20,6 +20,6 @@ func main() {
 
 	params := sb.GetQueryParams()
 
-	log.Println(sql)    // SELECT `name`,`age`,`school` FROM test WHERE `title` = ? AND `name` = ? OR `age` = ? OR `age` = ?
-	log.Println(params) // [hello jack 22 25]
+	log.Println(sql)    // SELECT `name`,`age`,`school` FROM `test` WHERE `title` = ? AND `name` = ? OR (`age` = ? OR `age` = ?) AND `class` = ?
+	log.Println(params) // [hello jack 22 25 2-3]
 }

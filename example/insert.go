@@ -8,8 +8,8 @@ import (
 func main() {
 	sb := builder.NewSQLBuilder()
 
-	sql, err := sb.Table("test").
-		Insert([]string{"name", "age"}, "jack", 18).
+	sql, err := sb.Table("`test`").
+		Insert([]string{"`name`", "`age`"}, "jack", 18).
 		GetInsertSQL()
 	if err != nil {
 		log.Fatal(err)
@@ -17,6 +17,6 @@ func main() {
 
 	params := sb.GetInsertParams()
 
-	log.Println(sql)    // INSERT INTO test (`name`,`age`) VALUES (?,?)
+	log.Println(sql)    // INSERT INTO `test` (`name`,`age`) VALUES (?,?)
 	log.Println(params) // [jack 18]
 }

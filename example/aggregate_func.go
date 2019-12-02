@@ -8,8 +8,8 @@ import (
 func main() {
 	sb := builder.NewSQLBuilder()
 
-	sql, err := sb.Table("test").
-		Select("count(`age`)", "username").
+	sql, err := sb.Table("`test`").
+		Select("count(`age`)", "`username`").
 		GetQuerySQL()
 	if err != nil {
 		log.Fatal(err)
@@ -17,6 +17,6 @@ func main() {
 
 	params := sb.GetQueryParams()
 
-	log.Println(sql)    // SELECT count(`age`), username FROM test
+	log.Println(sql)    // SELECT count(`age`), `username` FROM `test`
 	log.Println(params) // []
 }

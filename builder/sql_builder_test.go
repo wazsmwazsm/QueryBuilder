@@ -126,12 +126,12 @@ func TestSQLBuilderWhereRaw(t *testing.T) {
 		Select("`name`", "`age`", "`school`").
 		WhereRaw("`title` = ?", "hello").
 		Where("`name`", "=", "jack").
-		OrWhereRaw("`age` = ? OR `age` = ?", 22, 25).
+		OrWhereRaw("(`age` = ? OR `age` = ?)", 22, 25).
 		GetQuerySQL()
 	if err != nil {
 		t.Error(err)
 	}
-	expectSQL := "SELECT `name`,`age`,`school` FROM `test` WHERE `title` = ? AND `name` = ? OR `age` = ? OR `age` = ?"
+	expectSQL := "SELECT `name`,`age`,`school` FROM `test` WHERE `title` = ? AND `name` = ? OR (`age` = ? OR `age` = ?)"
 	if sql != expectSQL {
 		t.Error("sql gen err")
 	}
